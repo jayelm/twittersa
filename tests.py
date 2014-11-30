@@ -33,10 +33,10 @@ class TwitterSATestCase(unittest.TestCase):
 
     def test_invalid_user_id(self):
         """Test for invalid user ids"""
-        rv = self.app.get('/user?uid=')
-        assert 'Invalid user id' in rv.data
+        rv = self.app.get('/user?username=')
+        assert 'Invalid username' in rv.data
         rv = self.app.get('/user?nonsense=nonsense')
-        assert 'Invalid user id' in rv.data
+        assert 'Invalid username' in rv.data
 
 
 if __name__ == '__main__':

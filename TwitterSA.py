@@ -35,14 +35,19 @@ def search():
 @app.route('/user')
 def user():
     """Display historical sentiment of a given user's tweets."""
-    uid = request.args.get('uid', '')
-    if not uid:
+    username = request.args.get('username', '')
+    if not username:
         app.logger.info(
             "Requested /user endpoint with invalid parameters {}".format(
                 str(request.args))
         )
-        return render_template('error.html', error="Invalid user id")
-    return render_template('user.html', uid=uid)
+        return render_template('error.html', error="Invalid username")
+    timeline = api.user_timeline(
+        screen_name=username,
+        include_rts=True,
+        count=3200  # 2014-11-30: 3200 tweets is the max
+    )
+    return render_template('user.html', username=username, timeline=timeline)
 
 
 @app.before_first_request
