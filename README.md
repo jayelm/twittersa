@@ -1,4 +1,4 @@
-twitter-sa
+TwitterSA
 ==========
 
 CSCI339 Final Project
