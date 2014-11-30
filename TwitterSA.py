@@ -17,7 +17,13 @@ import tweepy
 def setup_logging():
     if not app.debug:
         # In production, make sure we log to stderr
-        app.logger.addHandler(logging.StreamHandler())
+        logger_handler = logging.StreamHandler()
+        logger_handler.setFormatter(
+            logging.Formatter(
+                '[%(asctime)s] %(levelname)s in %(module)s: %(message)s'
+            )
+        )
+        app.logger.addHandler(logger_handler)
         app.logger.setLevel(logging.INFO)
 
 
@@ -40,14 +46,13 @@ def tweepy_init():
     api = tweepy.API(auth)
     return api
 
-
 api = tweepy_init()
 
 if __name__ == '__main__':
     from argparse import ArgumentParser
     parser = ArgumentParser()
     parser.add_argument(
-        '-d', '--debug', action='store_const',
+        '-d', '--debug', action='store_true',
         help='run application in debug mode'
     )
     args = parser.parse_args()
