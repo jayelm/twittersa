@@ -6,8 +6,10 @@
 </head>
 
 <body>
-  <h1>Hi</h1>
-
+  <h1>Hello Tweets</h1>
+  {% for tweet in tweets %}
+    <p>{{tweet.text}}</p>
+  {% endfor %}
 </body>
 
 </html>

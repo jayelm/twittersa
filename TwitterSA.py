@@ -16,7 +16,8 @@ import tweepy
 @app.route('/')
 def hello_world():
     """Return an index page."""
-    return render_template('index.html')
+    tweets = api.search(q="hello")
+    return render_template('index.html', tweets=tweets)
 
 
 def parser_init():
