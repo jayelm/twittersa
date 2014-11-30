@@ -7,16 +7,48 @@ Jesse Mu
 
 import os
 import logging
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 app = Flask(__name__)
 
 import tweepy
 
 
+@app.route('/')
+def index():
+    """Return an index page."""
+    return render_template('index.html')
+
+
+@app.route('/search')
+def search():
+    """Display sentiment on tweets for a given search."""
+    q = request.args.get('q', '')
+    if not q:
+        app.logger.info(
+            "Requested /search endpoint with invalid parameters {}".format(
+                str(request.args))
+        )
+        return render_template('error.html', error="Invalid search query")
+    return render_template('search.html', q=q)
+
+
+@app.route('/user')
+def user():
+    """Display historical sentiment of a given user's tweets."""
+    uid = request.args.get('uid', '')
+    if not uid:
+        app.logger.info(
+            "Requested /user endpoint with invalid parameters {}".format(
+                str(request.args))
+        )
+        return render_template('error.html', error="Invalid user id")
+    return render_template('user.html', uid=uid)
+
+
 @app.before_first_request
 def setup_logging():
+    """In production, make sure we log to stderr."""
     if not app.debug:
-        # In production, make sure we log to stderr
         logger_handler = logging.StreamHandler()
         logger_handler.setFormatter(
             logging.Formatter(
@@ -25,13 +57,6 @@ def setup_logging():
         )
         app.logger.addHandler(logger_handler)
         app.logger.setLevel(logging.INFO)
-
-
-@app.route('/')
-def hello_world():
-    """Return an index page."""
-    tweets = api.search(q="hello")
-    return render_template('index.html', tweets=tweets)
 
 
 def tweepy_init():

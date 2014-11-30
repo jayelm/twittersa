@@ -1,15 +1,12 @@
-<!DOCTYPE html>
-<html>
-
-<head>
-
-</head>
-
-<body>
-  <h1>Hello Tweets</h1>
-  {% for tweet in tweets %}
-    <p>{{tweet.text}}</p>
-  {% endfor %}
-</body>
-
-</html>
+{% extends "layout.html" %}
+{% block body %}
+  <h1>TwitterSA</h1>
+  <form action="/search">
+    <label>Search a topic <input name="q"></label>
+    <input type="submit">
+  </form>
+  <form action="/user">
+    <label>or enter username <input name="uid"></label>
+    <input type="submit">
+  </form>
+{% endblock %}
