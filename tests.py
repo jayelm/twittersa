@@ -9,6 +9,15 @@ Jesse Mu
 
 import TwitterSA
 import unittest
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
+
+
+DATA_SOURCES = [
+    'lib/noslang.p'
+]
 
 
 class TwitterSATestCase(unittest.TestCase):
@@ -38,6 +47,12 @@ class TwitterSATestCase(unittest.TestCase):
         rv = self.app.get('/user?nonsense=nonsense')
         assert 'Invalid username' in rv.data
 
+    def test_data_sources(self):
+        """Test to make sure data sources exist and can be loaded"""
+        for filename in DATA_SOURCES:
+            with open(filename, 'r') as f:
+                data = pickle.load(f)
+                assert data
 
 if __name__ == '__main__':
     unittest.main()
