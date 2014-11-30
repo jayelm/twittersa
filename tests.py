@@ -19,6 +19,11 @@ class TwitterSATestCase(unittest.TestCase):
     def tearDown(self):
         pass
 
+    def test_twitter_api(self):
+        """Test to make sure the API is getting tweets"""
+        tweets = TwitterSA.api.search(q='hello')
+        assert tweets and len(tweets)
+
     def test_invalid_search_query(self):
         """Test for invalid search queries"""
         rv = self.app.get('/search?q=')
