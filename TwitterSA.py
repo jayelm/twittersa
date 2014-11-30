@@ -29,7 +29,14 @@ def search():
                 str(request.args))
         )
         return render_template('error.html', error="Invalid search query")
-    return render_template('search.html', q=q)
+    # FIXME: only 100 tweets is interesting and (probably bad), it results in
+    # a pretty low sample size based on relevancy, and
+    # (for popular search terms) changes very, very rapidly.
+    # Options:
+    # 1. Make multiple api calls
+    #   - Disadvantages: ++load times, ++api calls, dealing with overlaps
+    results = api.search(q=q, count=100)
+    return render_template('search.html', results=results)
 
 
 @app.route('/user')
@@ -67,8 +74,8 @@ def setup_logging():
 def tweepy_init():
     """
     Create an authorized Tweepy API instance with API keys in the environment
-    We only require the Consumer Key and the Consumer Secret because the
-    application only requires app-based authentication.
+    We only require the Consumer Key and the Consumer Secret because we only
+    use app-level endpoints and they give us higher rate limits.
     """
     consumer_key = os.environ['TWITTER_CONSUMER_KEY']
     consumer_secret = os.environ['TWITTER_CONSUMER_SECRET']
