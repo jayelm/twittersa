@@ -2,8 +2,6 @@
 BC CSCI339 NLP Final Project
 TwitterSA: Sentiment Analysis for Twitter
 
-TODO: Get logging working with Foreman and Heroku
-
 Jesse Mu
 """
 
