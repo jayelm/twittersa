@@ -10,10 +10,8 @@ Jesse Mu
 
 from bs4 import BeautifulSoup
 import requests
-try:
-    import cPickle as pickle
-except ImportError:
-    import pickle
+import pickle  # Standard pickle for unicode support
+import sys
 
 NOSLANG_URL = "http://www.noslang.com/dictionary/{}/"
 
@@ -66,14 +64,14 @@ def handle_filename(filename):
 
 if __name__ == '__main__':
     from argparse import ArgumentParser
-    import sys
     parser = ArgumentParser()
     parser.add_argument(
         '-o', '--output', nargs="?", const='lib/noslang.p', default='-',
-        help="specify output file (defaults to bin/noslang.p "
-             "if specified without file or stdout if not specified"
+        help="specify output file (defaults to lib/noslang.p "
+             "if specified without file or stdout if not specified)"
     )
     parser.add_argument(
+        # Verbose is used here because default behavior should be silent
         '-v', '--verbose', action='store_true',
         help="be verbose"
     )
