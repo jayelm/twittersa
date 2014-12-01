@@ -11,6 +11,7 @@ from flask import Flask, render_template, request
 app = Flask(__name__)
 
 import tweepy
+import sentiment as sa
 
 
 @app.route('/')
