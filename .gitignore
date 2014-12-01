@@ -1,6 +1,10 @@
 # Heroku environment variables
 .env
 
+# Full (200MB+) set of training data
+corpus/training.1600000.processed.noemoticon.csv
+corpus/training.1600000.processed.noemoticon.csv.shuffled
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
