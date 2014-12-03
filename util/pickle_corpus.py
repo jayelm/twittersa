@@ -6,20 +6,7 @@ Jesse Mu
 
 import pickle  # Standard pickle for unicode support
 import csv
-
-FILES = [
-    'corpora/training.500.csv',
-    'corpora/training.1000.csv',
-    'corpora/training.2000.csv',
-    'corpora/training.3000.csv',
-    'corpora/training.4000.csv',
-    'corpora/training.6000.csv',
-    'corpora/training.5000.csv',
-    'corpora/training.7000.csv',
-    'corpora/training.8000.csv',
-    'corpora/training.9000.csv',
-    'corpora/training.10000.csv',
-]
+import os
 
 
 def csv_extract(filename):
@@ -53,13 +40,15 @@ def serialize(filename, dictionary, verbose=False):
 
 def pickle_filename(filename):
     assert filename[-4:] == '.csv' and filename[:8] == 'corpora/'
-    return 'lib/{}.p'.format(filename[8:-4])
+    return 'lib/{}.pickle'.format(filename[8:-4])
 
 if __name__ == '__main__':
-    for filename in FILES:
-        print "parsing {}".format(filename)
-        tweets = csv_extract(filename)
-        pickle_file = pickle_filename(filename)
-        print "writing to {}".format(pickle_file)
-        with open(pickle_file, 'w') as fout:
-            pickle.dump(tweets, fout)
+    for filename in os.listdir("corpora/"):
+        if filename.endswith(".csv"):
+            filename = "corpora/{}".format(filename)
+            print "parsing {}".format(filename)
+            tweets = csv_extract(filename)
+            pickle_file = pickle_filename(filename)
+            print "writing to {}".format(pickle_file)
+            with open(pickle_file, 'w') as fout:
+                pickle.dump(tweets, fout)

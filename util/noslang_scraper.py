@@ -59,15 +59,15 @@ def serialize(filename, dictionary, verbose=False):
 def handle_filename(filename):
     """Prepare the filename - if directory specified, add default name"""
     if filename[-1] == '/':
-        filename += 'noslang.p'
+        filename += 'noslang.pickle'
     return filename
 
 if __name__ == '__main__':
     from argparse import ArgumentParser
     parser = ArgumentParser()
     parser.add_argument(
-        '-o', '--output', nargs="?", const='lib/noslang.p', default='-',
-        help="specify output file (defaults to lib/noslang.p "
+        '-o', '--output', nargs="?", const='lib/noslang.pickle', default='-',
+        help="specify output file (defaults to lib/noslang.pickle "
              "if specified without file or stdout if not specified)"
     )
     parser.add_argument(
