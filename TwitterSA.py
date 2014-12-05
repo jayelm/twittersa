@@ -179,10 +179,10 @@ def setup_logging():
 
 setup_logging()
 api = tweepy_init()
-app.logger.info('Training classifier...')
+app.logger.info('Loading classifier...')
 classifier = sa.TwitterClassifier()
 classifier.train()
-app.logger.info('Classifier trained.')
+app.logger.info('Done')
 
 if __name__ == '__main__':
     from argparse import ArgumentParser

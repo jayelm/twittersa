@@ -24,7 +24,7 @@ with open('lib/noslang.pickle', 'r') as fin:
 with open('lib/stopwords.pickle', 'r') as fin:
     stopwords = pickle.load(fin)
 
-PUNCTUATION = set('@$%^#&*()_+=-{}[]\|/:"\';",.')
+PUNCTUATION = set('@$%^!?#&*()_+=-{}[]\|/:"\';",.')
 porter_stemmer = porter.PorterStemmer()
 
 
@@ -90,10 +90,20 @@ def load_pickle(filename):
     return training
 
 
-PROD_TRAINING_FILE = 'lib/training.10000.pickle'
+PROD_TRAINING_FILE = 'lib/training.20000.pickle'
 PROD_TRAINING_DATA = load_pickle(PROD_TRAINING_FILE)
-PROD_PROCESSOR = BagOfWords(min_df=1, analyzer=preprocess)
-PROD_CLASSIFIER = MultinomialNB()
+PROD_PROCESSOR = BagOfWords(
+    min_df=1,
+    analyzer='word',
+    encoding='utf-8',
+    decode_error='replace',
+    preprocessor=preprocess,
+    tokenizer=word_tokenize,
+    stop_words=stopwords,
+    ngram_range=(1, 2),
+    binary=True
+)
+PROD_CLASSIFIER = BernoulliNB()
 
 
 class TwitterClassifier(object):
@@ -168,9 +178,9 @@ class Sentiment(object):
     @property
     def prob_scaled(self):
         if self._label == 'positive':
-            return self.positivity
+            return self.positivity - 0.5
         else:
-            return -self.negativity
+            return -self.negativity + 0.5
 
     @property
     def prob_scaled_rounded(self):
@@ -393,7 +403,7 @@ if __name__ == '__main__':
             # y_predict = classifier.predict(X_test)
 
             # fscore = f1_score(y_test, y_predict, pos_label='positive')
-            fscore = 500
+            fscore = 1000
 
             # Add totals for running average
             if args.showfeats:
