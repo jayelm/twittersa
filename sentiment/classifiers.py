@@ -11,10 +11,13 @@ from sklearn.feature_selection import SelectKBest, chi2, VarianceThreshold
 from sklearn.pipeline import Pipeline
 # from nltk.corpus.reader.sentiwordnet import SentiWordNetCorpusReader
 # NLTK's tokenizer, as opposed to scikit, is more robust
-from nltk import word_tokenize
+import nltk
 from nltk.stem import porter
 from random import shuffle
 import pickle  # Standard pickle for unicode support
+
+# Look for corpuses in this directory for heroku
+nltk.data.path.append('./nltk_data/')
 
 # Get slang dictionary
 with open('lib/noslang.pickle', 'r') as fin:
@@ -48,7 +51,7 @@ def preprocess(text):
             codec = 'latin-1'
             text = text.decode(codec)
 
-    text = word_tokenize(text)
+    text = nltk.word_tokenize(text)
     processed = []
     for i, word in enumerate(text):
         word = porter_stemmer.stem(word)
@@ -56,7 +59,7 @@ def preprocess(text):
             continue
         if word in slang:
             # Look up the expanded acronym, and break that apart
-            words = word_tokenize(slang[word])
+            words = nltk.word_tokenize(slang[word])
             processed.extend(words)
         else:
             processed.append(word)
@@ -90,7 +93,7 @@ def load_pickle(filename):
     return training
 
 
-PROD_TRAINING_FILE = 'lib/training.20000.pickle'
+PROD_TRAINING_FILE = 'lib/training.15000.pickle'
 PROD_TRAINING_DATA = load_pickle(PROD_TRAINING_FILE)
 PROD_PROCESSOR = BagOfWords(
     min_df=1,
@@ -98,7 +101,7 @@ PROD_PROCESSOR = BagOfWords(
     encoding='utf-8',
     decode_error='replace',
     preprocessor=preprocess,
-    tokenizer=word_tokenize,
+    tokenizer=nltk.word_tokenize,
     stop_words=stopwords,
     ngram_range=(1, 2),
     binary=True
@@ -351,7 +354,7 @@ if __name__ == '__main__':
                 decode_error='replace',  # For the one-off latin-1 tweets
                 ngram_range=(1, args.ngram),
                 preprocessor=preprocess,
-                tokenizer=word_tokenize,
+                tokenizer=nltk.word_tokenize,
                 stop_words=stopwords if args.stopwords else None,
                 binary=(args.classifier == 'bernoulli'),
             )
