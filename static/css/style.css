@@ -1,0 +1,25 @@
+div.container {
+  text-align: center;
+}
+
+#search-row {
+  margin-bottom: 15px;
+}
+
+#timeline {
+  width: 100%;
+  height: 100%;
+}
+
+table {
+    text-align: left;
+    word-wrap: break-word;
+}
+
+tr.hidden {
+    display: none;
+}
+
+tr.visible {
+    display: block;
+}

@@ -1,9 +1,72 @@
 {% extends "layout.html" %}
-{% block body %}
-  <h1>User</h1>
-  <p>{{ username }}</p>
+{% block main %}
+  <h1>{{ username }}</h1>
+  <div class="row" id="timeline-wrapper">
+    <canvas id="timeline"></canvas>
+  </div>
   <h1>Tweets</h1>
-  {% for tweet in timeline %}
-    <p>{{ tweet.text }}</p>
-  {% endfor %}
+  <div class="table-responsive">
+    <table class="table table-hover" id="tweet-table">
+      <tbody>
+        {% for date in data.labels|reverse %}
+          {% for tweet in tweet_bins[loop.index0] %}
+            <tr class="{{ date }}">
+              <td class="col-md-6">{{ tweet.tweet.text }}</td>
+              <td class="col-md-3">{{ tweet.sentiment.prob_scaled_rounded }}</td>
+              <td class="col-md-3">{{ tweet.created_at_human }}</td>
+            </tr>
+          {% endfor %}
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    // Get the context of the canvas element we want to select
+    Chart.defaults.global.responsive = true;
+    data = {{ data|tojson }};
+    var step  = 5;
+    var max   = 90
+    var start = 40;
+    options = {
+      bezierCurve: true,
+      bezierCurveTension: 0.4,
+      scaleShowGridLines: true,
+      scaleGridLineWidth: 1,
+      pointDot: true,
+      pointDotRadius: 4,
+      pointDotStrokeWidth: 1,
+      pointHitDetectionRadius: 20,
+      datasetStroke: true,
+      datasetStrokeWidth: 2,
+      datasetFill: true,
+      // Override scaling (always -1 to 1 scale)
+      scaleOverride: true,
+      scaleSteps: 8,
+      scaleStepWidth: 0.25,
+      scaleStartValue: -1
+    };
+    /* console.log(data) */
+    var rows = document.getElementsByTagName('tr');
+    var canvas = document.getElementById('timeline');
+    var ctx = canvas.getContext('2d');
+    var timelineChart = new Chart(ctx).Line(data, options);
+    canvas.addEventListener('click', function(e) {
+      var activePoints = timelineChart.getPointsAtEvent(e);
+      if (activePoints.length === 0) return;
+      var dateLabel = activePoints[0].label;
+      for (var i=0; i<rows.length; i++) {
+        row = rows[i];
+        if (row.className.indexOf(dateLabel) !== -1) {
+          // We count on these new classes being appended, so we can
+          // always use startsWith
+          row.classList.remove('hidden');
+          row.classList.add('visible');
+        } else {
+          row.classList.remove('visible')
+          row.classList.add('hidden');
+        }
+      }
+    });
+  </script>
 {% endblock %}

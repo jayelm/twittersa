@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
-{% block body %}
+{% block main %}
   <h1>Search</h1>
-  {% for tweet in results %}
-    <p>{{ tweet.text }}</p>
+  {% for tweet in tweetsents %}
+    <p>{{ tweet }}</p>
   {% endfor %}
 {% endblock %}
