@@ -11,6 +11,7 @@ from sklearn.feature_selection import SelectKBest, chi2, VarianceThreshold
 from sklearn.pipeline import Pipeline
 # from nltk.corpus.reader.sentiwordnet import SentiWordNetCorpusReader
 # NLTK's tokenizer, as opposed to scikit, is more robust
+import re
 import nltk
 from nltk.stem import porter
 from random import shuffle
@@ -39,7 +40,6 @@ def preprocess(text):
      - Porter stemming
      - Removing punctuation
     """
-    text = text.lower()
     is_unicode = isinstance(text, unicode)
     # Attempt to decode for word_tokenize
     if not is_unicode:
@@ -51,6 +51,9 @@ def preprocess(text):
             codec = 'latin-1'
             text = text.decode(codec)
 
+    text = text.lower()
+    # Remove two or more occurrences of characters`
+    text = re.sub(r'(.)\1+', r'\1\1', text)
     text = nltk.word_tokenize(text)
     processed = []
     for i, word in enumerate(text):
