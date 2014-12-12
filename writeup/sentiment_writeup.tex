@@ -4,7 +4,7 @@
 \usepackage{amssymb}
 \usepackage{bm}
 \usepackage{synttree}
-% \usepackage[margin=1in]{geometry}
+\usepackage[margin=1in]{geometry}
 \usepackage{graphicx}
 \pagestyle{fancy}
 \lhead{Jesse Mu}
@@ -256,7 +256,17 @@ implemented steps:
         partial reduction is better than no reduction, and there may be value
         in differentiating between normal and emphasized uses of words.
     \end{itemize}
+    \item Emoticons are not considered in this training set. They are
+      automatically removed by the Sentiment140 training corpus since an
+      emoticon is present in every single training example such that they would
+      carry no real information.
+    \item Emoji (Japanese characters, of which many contain emoticons and other
+      subjective images) are considered implicitly, when possible, since a
+      subset of Emoji are represented by Unicode characters. Since I deal with
+      unicode literals in my preprocessing step, these characters do have
+      sentiments and counts associated with them.
 \end{itemize}
+
 
 After the text has been preprocessed, each document must be converted into a
 numerical vector to be processed efficiently by a classification algorithm.
@@ -290,6 +300,10 @@ parameters that can be fine-tuned to produce better performance.
 \subsubsection{Laplace Smoothing}
 \label{ssub:laplace_smoothing}
 
+Laplace (+1) smoothing is implemented in the scikit Naive Bayes classifiers for
+dealing with unknown words. Lidstone (+0.5) smoothing was considered briefly as
+well, but appeared to have little to no effect on classifier metrics.
+
 \subsection{Initial Evaluation: Bernoulli versus Multinomial Naive Bayes}
 \label{sub:initial_evaluation}
 
@@ -308,40 +322,219 @@ implement these classifiers. Non-binary data given to a \texttt{BernoulliNB}
 instance is binarized and treated like a binary distribution.
 
 One imporant decision to make before continuing with analysis is whether to use
-the Bernoulli or the Multinomial distribution. Using a standard bag-of-words
-approach with my preprocessing function, figure ? shows both the accuracy and
+the Bernoulli or the Multinomial distribution. The easiest way to make this
+decision is to simply compare the performance of bost on some naive, simple
+implementation of the classifiers.
+
+For this initial evaluation, I used a standard bag-of-words approach with my
+preprocessing function. Training set size was broken into randomly sampled sets
+from 100 to 25000 tweets. A standard Bernoulli or Multinomial Naive Bayes
+classifier was run on a 70/30 train/test split, and was randomly sampled and
+tested 5 times to reduce the variance with test set selection.
+Figure~\ref{fig:bow_bernoulli_vs_multinomial} shows both the accuracy and
 $F$-score performance metrics for Bernoulli and Multinomial Naive Bayes
 classifiers based on varying training sets.
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=0.8\linewidth]{name.ext}
-  \caption{Name}
-  \label{fig:name}
+  \includegraphics[width=\linewidth]{img/bow_bernoulli_vs_multinomial.png}
+  \caption{Bernoulli vs Multinomial NB plotted against data set size}
+  \label{fig:bow_bernoulli_vs_multinomial}
 \end{figure}
 
+As evidenced from Figure~\ref{fig:bow_bernoulli_vs_multinomial}, the difference
+between a Bernoulli and Multinomial distribution is very little, with the
+Bernoulli accuracy and $F$-score just slightly outperforming the multinomial
+metrics with data set of sizes 15,000+, with peak accuracy achieved by the
+Binomial Naive Bayes classifier at 74.21\%. This is a good accuracy achieved
+with considering very standard implementation details.
+
+The small difference between the Bernoulli and Multinomial distributions is
+attributed to the short nature of Tweets. Multinomial classifiers take counts
+of words into account, with multiple words carrying higher weight than singular
+words. However, since Tweets are very short, multiple word occurrences do not
+occur often enough for sufficient information to be gained from considering
+multiple counts.
+
+One other interesting thing to note is the effect of data size on
+classification accuracy. Although accuracy rises rapidly when dealing with
+smaller data sets (from $\sim$55\% accuracy to $\sim$75\%), the classifier
+experiences diminishing returns when continuing to increase the data set size.
+From initial evaluation, performance on the classifier seemed to flatten out
+enough that a 25,000 tweet corpus was used as a good balance between accuracy
+and speed for the tandard evaluation size for
+the rest of the experiments conducted here. However, as we will see later,
+greatly increasing data (by orders of magntiude) does continue to improve
+classifier performance.
+
+Since a Bernoulli Naive Bayes distribution is mildly more efficient, we will
+continue using it alone, especially considering that the Bernoulli Naive Bayes
+classifier is generally recommended over the Multinomial for short documents
+\cite{manning08}.
+
 \subsection{Improving Classification Accuracy}
+
+The task at hand then becomes: how can we improve classification accuracy of
+the model developed? With the selection of a Bernoulli Naive Bayes classifier,
+the bulk of the potential for improvement lies in two main factors:
+
+\begin{itemize}
+  \item Improving feature extraction and selection
+  \item Obtaining more data
+\end{itemize}
 
 \subsubsection{N-grams}
 \label{ssub:n_grams}
 
+The most basic NB classifier tested in the initial evaluation simply considers
+all globally unique $n$ words as features. One way to potentially improve
+classification accuracy is by including strings of words as features. For
+example, ``The movie was not great'' can be broken down into bigrams ``The
+movie'', ``movie was'', ``was not'', and ``not great''. Trigrams are similarly
+constructed
+
+The theoretical underpinning behind N-grams is that longer, combined sections
+of words can capture more sophisticated language constructs than unigrams can.
+Most notably, the inclusion of bigrams as features is one solution to the
+negation problem, where the classifier can then consider directly negated
+features, i.e. ``not good''. Of course, ``not'' and ``good'' are still
+considered as unigram features, but the idea is that the presence of the bigram
+would outweigh these two features. Furthermore, there is value in recognizing
+the difference between ``somewhat good'' and ``extremely good'', two adjectives
+that would be missed from unigram feature selection but included and
+differentiated by bigrams.
+
+These word-constructs are especially useful to Naive Bayes and bag-of-words
+classifiers since they assume independence between all features. By including
+ordered sections of words, N-grams add order considerations to the classifier,
+not in the classification algorithm itself but the feature selection. As
+displayed in Table~\ref{tab:ngrams}, accuracy gains are relatively minimal,
+however, we see a jump of about 0.7\% accuracy when including bigrams. Trigrams
+prove to overfit the data, and result in an accuracy reduction of 0.35\%; this
+is probably due to the brevity of Tweets.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{c | c}
+  N-grams & Accuracy \\
+  \hline
+  1 & 0.7408 \\
+  2 & 0.7473 \\
+  3 & 0.7448
+\end{tabular}
+\caption{Classifier accuracy for the cumulative addition of N-grams, 25000 data
+set, averaged over 5 samples}
+\label{tab:ngrams}
+\end{table}
+
+In scikit-learn, N-gram selection is implemented by setting the
+\texttt{ngram\_range} variable during creation of the
+\texttt{CountVectorizer}. \texttt{(1, 1)} is the default, with cumulative
+bigrams and trigrams representd by \texttt{(1, 2)} and \texttt{(1, 3)}
+respectively.
+
 \subsubsection{Reducing features: select $k$-best}
 \label{ssub:reducing_features_select_k_best}
 
+With the improved model considering bigrams in addition to unigrams, one of the
+ways commonly reported to increase accuracy is to actually \emph{remove}
+features; in doing so, the classifier is able to eliminate ``noisy'' features.
+Selecting the $k$-best features in a data set is an attempt to statistically
+determine the most ``informative'' features, and use only those features.
+
+``Noisy'' features are those features that are probably irrelevant to the
+sentiment of a data, but information learned from a training corpus may still
+associate a given sentiment for a word; for example, due to the occurrences of
+the word ``sandwich'' in the training dataset, it may inadvertently carry a
+negative sentiment, although intuition tells us that ``sandwich'' should be
+neither a positive or a negative word. The goal of select $k$-best feature
+selection is to remove words like these that may skew document predictions.
+
+There are multiple ways to evaluate which features are the most informative,
+including selection via mutual information, chi-squared statistical testing,
+ANOVA filtering, and more. Manning \cite{manning08} recommends the
+chi-squared ($\chi^2$) statistical test for feature selection on text
+classification, which is implemented in scikit as
+\texttt{sklearn.feature\_selection.chi2}, with the corresponding select
+$k$-best implementation at \texttt{sklearn.feature\_selection. SelectKBest}.
+The \texttt{SelectKBest} instance takes a vectorized 2D array of feature
+vectors, where it applies a given statistical test to determine the
+user-supplied $k$-best features, trimming the array down into an $m \times k$
+matrix.
+
+For the 25,000 tweet data set, there are around 140,000 unigram + bigram
+features. Figure~\ref{fig:k_best} shows the effect of select $k$-best feature
+selection on classifier accuracy, averaged over 5 splits, based on varying
+amounts of $k$. Surprisingly, select $k$-best feature selection does not appear
+to have a significant effect on classifier accuracy. Obviously, when the number
+of features selected is very low (e.g. 10), there is not nearly enough
+information to make reliabale decisions on the data, and the accuracy is very
+low. However, anywhere in the area between 5,000 and 140,000 features, select
+$k$-best feature selection has little-to-no effect on classifier accuracy.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.8\linewidth]{img/k_best}
+  \caption{Select $k$-best feature selection performance on 25000 data set
+  (bigrams + unigrams), averaged over 5 splits}
+  \label{fig:k_best}
+\end{figure}
+
+This is probably due to the fact that for bigger data sets and an equal
+distribution of positive and negative cases, irrelevant words tend to appear
+equally among both cases (i.e. the word ``the'' and ``sandwich'' should both
+end up appearing in around 50\%
+positive and negative cases). The Naive Bayes classifier is mathematically
+insensitive to irrelevant features \cite{manning08}, so such features would not
+have a big effect on classifier accuracy. Only on somewhat smaller data set sizes would
+select $k$-best feature selection make a bigger difference in classifier
+accuracy.
 % Use the graph you had before
 
-\subsubsection{Variance Threshold Feature Removal}
+\subsubsection{Other Feature Selection Techniques}
 \label{ssub:variance_threshold_feature_removal}
 
-% Do some tests
+Both ``term inverse, inverse document frequency'' (TF-IDF) and variance
+threshold removal feature selection techniques were considered, but neither
+appeard to
+have any tangible effect on classifier accuracy. TF-IDF is a
+vector-transformation method that increases the importance of words depending on
+how often they appear in a given document (TF) but downplays the importance of
+words that appear several times in all documents (IDF). Because of the brevity
+of the words in the Tweet corpus, TF-IDF does not have much effect on
+classifier accuracy.
 
-\subsubsection{Term Inverse, Inverse Document Frequency Selection}
-\label{ssub:term_inverse_inverse_document_frequency_selection}
+Variance threshold feature removal removes features whose variance does not
+pass a certain threshold. Multiple thresholds were tested (0, 0.5, 1), but none
+seemed to have a large effect.
+
+% Do some tests
 
 % Do some tests
 
 \subsubsection{More Data - Diminishing Returns}
 \label{ssub:more_data}
+
+One of the use cases in which a Naive Bayes classifier is recommended is when
+large amounts of data is available. A Naive Bayes classifier is crude but fast,
+so it can take advantage of large amounts of data while still maintaining a
+reasonable running time over comparable algorithms \cite{davis13}. As it turns
+out, the single most effective way to increase test set accuracy on this
+project is to greatly increase the amount of data. Although 25,000 was used as
+the benchmark, Figure~\ref{fig:large_data_sets} shows the accuracy of a
+classifier (with bigrams and 0.0 variance threshold feature removal) on data
+sets at 25,000, 100,000, 250,000 and 500,000 tweets, averaged over 5 samples.
+There is marked increase in classifier accuracy dependent on increasing size,
+but at 500,000 tweets, memory and training time becomes an issue---the 500,000
+tweet training set takes nearly 10 minutes to run and evaluate. A peak is
+achieved for the 500,000 tweet data set at 79.12\%.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.8\linewidth]{img/large_data_sets.png}
+  \caption{Effect of large training sets on classifier accuracy}
+  \label{fig:large_data_sets}
+\end{figure}
 
 
 \section{Building the Web App}
@@ -411,11 +604,10 @@ library in action is located in Figure~\ref{fig:obama}.
 \section{Conclusions}
 
 Using a standard Bernoulli Naive Bayes classification algorithm on the largest
-500,000 tweet dataset (350,000/150,000 train/test split) with relatively simple
-feature extraction techniques, the peak accuracy achieved by this
-classification system is 79.12\%. This is a surprisingly good result that shows
-the efficacy of simple, probabilistic machine learning techniques when applied
-to sentiment analysis.
+500,000 tweet dataset (350,000/150,000 train/test split) with bigram feature
+selection, the peak accuracy achieved by this classification system is 79.12\%.
+This is a surprisingly good result that shows the efficacy of simple,
+probabilistic machine learning techniques when applied to sentiment analysis.
 
 Most notably, the task of sentiment analysis itself is
 not a 100\% agreeable problem.  Specifically, Wilson et al. \cite{wilson05}, in
@@ -428,12 +620,135 @@ still quite good, and is comparable to the state-of-the-art work in statistical
 sentiment analysis; Pang et al. \cite{pang02} report a maximum accuracy
 percentage with a Naive Bayes classifier of 81.0\%.
 
+There were of course several limitations to this study. Most of them were
+mentioned during the writeup as I consider the implications of various
+decisions used during the task. For example, the Sentiment140 dataset's
+collection assumption could be inherently problematic (they are not
+hand-classified), but the size of the training set outweighs this possible
+disadvantage. Also, training data was taken from this same corpus. As such,
+emoticons could not be considered, since they are removed from the original
+Sentiment140 training set.
+
+Since a Naive Bayes classifier is somewhat overconfident, using its probability
+estimation as a ``confidence'' metric is somewhat problematic. This is somewhat
+mitigated by the fact that the Flask application averages all of the
+probabilities to gain a more global sentiment, but it is one of the inherent
+weeknesses in a Naive Bayes classifier.
+
+Notably, many feature selection techniques that were considered to work well
+for text classification did not (especially the select $k$-best feature
+selection). This could be indicative of an inherent issue with the subject
+matter of the training corpus, and may need to be investigated further. Testing
+on different, hand-tagged training sets, for example, may yield better results.
+
 \paragraph{Ideas for Further Work}
 
-Only a binary classifier built, since the data was binary - work on
-subjectivity. This is mitigated somewhat by flask app averages
+Only a binary classifier was built, which distinguishes between positive and
+negative examples. Since a NB classifier is somewhat overconfident on
+decisions, including a neutral class may actually improve accuracy. This could
+also improve the handling of decidedly netural tweets (e.g. ``I am eating a
+sandwich''). Identifying neutrality could be done by making a probability
+confidence threshold for polarity in the Naive Bayes classifier or other
+methods implemented by Gamallo \cite{gamallo14} which first considers wheter or
+not a tweet is Subjective or Objective before determining polarity.
+
+With a bigger time investment, one interesting thing to do would be to look at
+precision and recall metrics along with simple accuracy. This could give a more
+sophisticated view of the performance of the classifier based on the different
+properties selected.
+
+More feature selection and preprocessing techniques could be considered; for
+example, URLs can be normalized, instead of simply being stripped with
+puncuation, and mentions and hashtags could simply be completely removed
+instead of stripped of punctuation. A close analysis of accuracy would be
+necessary to determine whether these changes would be beneficial for the
+classifier. Narayanan \cite{narayanan13} also implements a negation
+preprocessing step that prefixes negated words with \texttt{not\_}. Although I
+implicitly try to amend this issue with N-gram feature selection, the negation
+approach is certainly more sophisiticated and can probably result in better
+analysis.
+
+It also may be possible to include some discrete features separate from the
+bag-of-words representation, including document length, number of ``polarized''
+words according to a polarity lexicon, etc. These ideas are considered by
+Gamallo \cite{gamallo14}. For tweets specifically, heuristic document features
+like document length will probably not play a large role, althoguh a more
+content-based approach could (with appropriate feature scaling) play a role.
+
+And again, with more time and memory, further increasing data (up to
+Sentiment140's 1,600,000 tweet corpus) will most likely further increase
+accuracy. It may also be appropriate to examine other classification
+algorithms, such as SVM or Ensemble methods, and make a comparative analysis.
+
+\appendix
+\section{Appendix: Python script help output}
+
+\subsection{\texttt{classifiers.py}}
+\label{sub:classifiers}
+
+\begingroup
+\fontsize{10pt}{12pt}\selectfont
+\begin{verbatim}
+usage: classifiers.py [-h] [-a] [-c CLASSIFIER] [-s] [-n NGRAM]
+                      [--tf | --tfidf] [--show-best-features] [-k KBEST]
+                      [-v [THRESHOLD]] [-p [PICKLE]] [-N NUM] [-r]
+                      [corpus [corpus ...]]
+
+positional arguments:
+  corpus                corpus sizes (must be the size of a .pickle file in
+                        lib/)
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -a, --all             grab all training .pickle files in lib
+  -c CLASSIFIER, --classifier CLASSIFIER
+                        specifiy classifier (bernoulli or multinomial)
+  -s, --stopwords       filter out stopwords before processing
+  -n NGRAM, --ngram NGRAM
+                        use ngrams in addition to unigrams
+  --tf                  use tf feature normalization
+  --tfidf               use tf-idf feature normalization (incompatible with
+                        --tf)
+  -k KBEST, --k-best KBEST
+                        select k best features with chi-squared statistical
+                        test
+  -v [THRESHOLD], --variance-threshold [THRESHOLD]
+                        remove features with variance below threshold
+  -p [PICKLE], --pickle [PICKLE]
+                        save last classifier to given destination
+  -N NUM, --num NUM     number of times to train each classifier
+  -r, --repl            enter REPL for last classifier
+\end{verbatim}
+\endgroup
+
+\subsection{\texttt{TwitterSA.py}}
+\label{sub:twittersa}
+
+\textbf{Note:} environment variables must be set before running the script.
+
+\begingroup
+\fontsize{10pt}{12pt}\selectfont
+\begin{verbatim}
+[2014-12-12 16:10:35,371] INFO in TwitterSA: Loading classifier...
+[2014-12-12 16:10:57,365] INFO in TwitterSA: Done
+usage: TwitterSA.py [-h] [-d]
+
+optional arguments:
+  -h, --help   show this help message and exit
+  -d, --debug  run application in debug mode
+\end{verbatim}
+\endgroup
+
+
+% \newpage
 
 \begin{thebibliography}{9}
+
+\bibitem{davis13}
+  Davis, E. Naive Bayes for Classifying Text. Lecture notes from
+  \emph{Introduction to Artificial Intelligence} (V22.0480.001, 2013), New York
+  University.
+  Retrieved from http://www.cs.nyu.edu/faculty/davise/ai/.
 
 \bibitem{gamallo14}
   Gamallo, P., and Garcia, M. Citius: A Naive-Bayes Strategy for Sentiment
@@ -448,6 +763,10 @@ subjectivity. This is mitigated somewhat by flask app averages
   Huang, J., Lu, J., and Ling, C. X. Comparing Naive Bayes, Decision Trees, and
   SVM with AUC and Accuracy. In \emph{The Third IEEE International Conference
   on Data Mining} (Melbourne, FL, 2003), 553--556.
+
+\bibitem{manning08}
+  Manning, C., Raghavan, P., and Schütze, H. /emph{Introduction to Information
+  Retrieval}. Cambridge University Press, Cambridge, 2008.
 
 \bibitem{narayanan13}
   Narayanan, V., Arora, I., and Bhatia, A. Fast and accurate sentiment
