@@ -12,20 +12,18 @@ Heroku/scipy [buildpack](https://github.com/thenovices/heroku-buildpack-scipy)
 which can be set with `heroku config:set
 BUILDPACK_URL=https://github.com/thenovices/heroku-buildpack-scipy`
 
-The standalone app can be run on localhost with `python TwitterSA.py` and
-requires Flask, Tweepy, and Scikit-Learn + dependencies.
-
-This is a heroku app, using gunicorn as the web server.
+This is a Heroku app with gunicorn as the web server, but the standalone app
+can be run on localhost with `python TwitterSA.py` or `foreman start` and
+requires Flask, Tweepy, and Scikit-Learn + dependencies, which can be installed
+with
 
     pip install -r requirements.txt
-
-`python TwitterSA.py` or `foreman start`
 
 TwitterSA requires application-level authentication from a registered Twitter
 application, and thus requires valid Consumer Key and Consumer Secret API keys
 from http://dev.twitter.com/apps.
 
-These keys must be set as environment variables (`CONSUMER_KEY` and
+These keys must be set as environment variables (export `CONSUMER_KEY` and
 `CONSUMER_SECRET`), or set them in `.env` and run with `foreman` or Heroku.
 
 ## Classifiers
@@ -45,7 +43,7 @@ Usage should be pretty self explanatory by accessing help:
     # of the 5 samples.
     python sentiment/classifiers.py -N 5 -n 2 25000 --tfidf -c multinomial
 
-    # BernoulliNB with unigrams and bigrams, 0 variance threshold removal, 
+    # BernoulliNB with unigrams and bigrams, 0 variance threshold removal,
     # serialization of the classifier, and an interactive REPL for
     # classification after training on the 25000 tweet data set
     python sentiment/classifiers.py -n 2 25000 -vpr
