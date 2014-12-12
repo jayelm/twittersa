@@ -13,7 +13,8 @@ import pickle  # Standard pickle for unicode support
 
 
 DATA_SOURCES = [
-    'lib/noslang.p'
+    'lib/noslang.pickle'
+    'lib/stopwords.pickle'
 ]
 
 
