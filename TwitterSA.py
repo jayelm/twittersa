@@ -37,16 +37,10 @@ def search():
     # User search
     if q.startswith('@'):
         return user(q)
-    # Main search
-    # FIXME: only 100 tweets is interesting and (probably bad), it results in
-    # a pretty low sample size based on relevancy, and
-    # (for popular search terms) changes very, very rapidly.
-    # Options:
-    # 1. Make multiple api calls
-    #   - Disadvantages: ++load times, ++api calls, dealing with overlaps
-    tweets = api.search(q=q, count=100)
-    tweetsents = classifier.predict_many(tweets)
-    return render_template('search.html', tweetsents=tweetsents)
+    return render_template(
+        'error.html',
+        error="Invalid user - make sure to use use @"
+    )
 
 
 def user(username):
