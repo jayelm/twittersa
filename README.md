@@ -58,8 +58,18 @@ web application.
 
 ## Util
 
-Contains helper scripts for related tasks.
+Contains helper scripts for related tasks. **NB**: These are intended to be ran
+from the repository home directory, e.g. `python util/noslang_parser.py`. I
+should probably make this a module?
 
  - `noslang_parser.py`
      - Parses and serializes abbrevations from
        [noslang](http://www.noslang.com/) dictionary
+ - `semeval/`
+     - Contains Tweet corpora from the SemEval 2013 (?) classification task
+     - To download, use `tweet_download.py`
+ - `tweet_download.py`
+     - Downloads Tweets in the SemEval .tsv files by scraping URLs.
+ - `pickle_corpus.py`
+     - Grabs training .csv files specified in `corpora/`, parses them, removes
+         everything but sentiment and text, and serializes them in `lib/`.
