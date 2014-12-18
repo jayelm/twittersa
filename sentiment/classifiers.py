@@ -7,7 +7,7 @@ Jesse Mu
 from sklearn.naive_bayes import MultinomialNB, BernoulliNB
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from sklearn.feature_selection import SelectKBest, chi2, VarianceThreshold
-# from sklearn.metrics import f1_score
+from sklearn.metrics import f1_score
 from sklearn.pipeline import Pipeline
 # from nltk.corpus.reader.sentiwordnet import SentiWordNetCorpusReader
 # NLTK's tokenizer, as opposed to scikit, is more robust
@@ -398,18 +398,9 @@ if __name__ == '__main__':
             X_test, y_test = map(list, zip(*testing))
             accuracy = classifier.score(X_test, y_test)
 
-            # x = vectorizer.transform(X_test)
-            # print x.shape
-            # x = tfidf.transform(x)
-            # print x.shape
-            # x = selector.transform(x)
-            # print x.shape
+            y_predict = classifier.predict(X_test)
 
-            # FIXME this has not been updated to use zipping
-            # y_predict = classifier.predict(X_test)
-
-            # fscore = f1_score(y_test, y_predict, pos_label='positive')
-            fscore = 1000
+            fscore = f1_score(y_test, y_predict, pos_label='positive')
 
             # Add totals for running average
             if args.showfeats:
