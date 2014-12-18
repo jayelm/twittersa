@@ -9,7 +9,6 @@ from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from sklearn.feature_selection import SelectKBest, chi2, VarianceThreshold
 from sklearn.metrics import f1_score
 from sklearn.pipeline import Pipeline
-# from nltk.corpus.reader.sentiwordnet import SentiWordNetCorpusReader
 # NLTK's tokenizer, as opposed to scikit, is more robust
 import re
 import nltk
@@ -17,7 +16,7 @@ from nltk.stem import porter
 from random import shuffle
 import pickle  # Standard pickle for unicode support
 
-# Look for corpuses in this directory for heroku
+# Look for corpora in this directory for heroku
 nltk.data.path.append('./nltk_data/')
 
 # Get slang dictionary
