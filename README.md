@@ -1,4 +1,4 @@
-# TwitterSA
+# Twittersa
 
 BC CSCI339 (Natural Language Processing) Final Project
 
@@ -13,13 +13,13 @@ which can be set with `heroku config:set
 BUILDPACK_URL=https://github.com/thenovices/heroku-buildpack-scipy`
 
 This is a Heroku app with gunicorn as the web server, but the standalone app
-can be run on localhost with `python TwitterSA.py` or `foreman start` and
+can be run on localhost with `python twittersa.py` or `foreman start` and
 requires Flask, Tweepy, and Scikit-Learn + dependencies, which can be installed
 with
 
     pip install -r requirements.txt
 
-TwitterSA requires application-level authentication from a registered Twitter
+Twittersa requires application-level authentication from a registered Twitter
 application, and thus requires valid Consumer Key and Consumer Secret API keys
 from http://dev.twitter.com/apps.
 
@@ -49,7 +49,7 @@ Usage should be pretty self explanatory by accessing help:
     python sentiment/classifiers.py -n 2 25000 -vpr
 
 Currently the global variables present in the script prefixed with `PROD_` will
-be automatically selected in TwitterSA to serve as the classifier backing the
+be automatically selected in Twittersa to serve as the classifier backing the
 web application.
 
 ## Testing

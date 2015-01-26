@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 BC CSCI339 NLP Final Project
-TwitterSA: Sentiment Analysis for Twitter
+Twittersa: Sentiment Analysis for Twitter
 
 Jesse Mu
 """

@@ -1,13 +1,10 @@
 """
-Tests for TwitterSA
-
-These tests might be overkill, it's my first time messing around
-with unit tests.
+Tests for Twittersa
 
 Jesse Mu
 """
 
-import TwitterSA
+import twittersa
 import unittest
 import pickle  # Standard pickle for unicode support
 
@@ -18,17 +15,17 @@ DATA_SOURCES = [
 ]
 
 
-class TwitterSATestCase(unittest.TestCase):
+class TwittersaTestCase(unittest.TestCase):
     def setUp(self):
-        TwitterSA.app.config['TESTING'] = True
-        self.app = TwitterSA.app.test_client()
+        twittersa.app.config['TESTING'] = True
+        self.app = twittersa.app.test_client()
 
     def tearDown(self):
         pass
 
     def test_twitter_api(self):
         """Test to make sure the API is getting tweets"""
-        tweets = TwitterSA.api.search(q='hello')
+        tweets = twittersa.api.search(q='hello')
         assert tweets and len(tweets)
 
     def test_invalid_search_query(self):

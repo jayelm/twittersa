@@ -172,7 +172,7 @@ discrete data, Bernoulli and Multinomial, which will be discussed further.
 
 The full source code for this project is open-source and available on GitHub at the following
 URL:
-https://github.com/jayelm/TwitterSA.
+https://github.com/jayelm/twittersa.
 
 The code is written exclusively in Python, selected primarily due to software
 package availability. Text classification code uses the popular
@@ -544,7 +544,7 @@ achieved for the 500,000 tweet data set at 79.12\%.
 
 As previously mentioned, the web application was written in
 Flask, and simply includes an index page, a user endpoint page, and an error
-page. Most of the code is included in \texttt{TwitterSA.py}. When submitting a
+page. Most of the code is included in \texttt{twittersa.py}. When submitting a
 request to the \texttt{/search?q=<USER-ID>} endpoint, the user function takes
 the supplied Twitter username and attempts to get historical tweets associated
 with that user by calling the \texttt{statuses/user\_timeline} Twitter API
@@ -552,7 +552,7 @@ endpoint. If no tweets are found, either because the user does not exist or the
 timeline is private, an error page is shown.
 
 How many tweets the application gets is dependent on the
-\texttt{USER\_API\_CALLS} global variable set in \texttt{TwitterSA.py}. The API
+\texttt{USER\_API\_CALLS} global variable set in \texttt{twittersa.py}. The API
 enforces a limit of 200 tweets per user timeline call, and keeps a maximum
 of up to 3200 tweets of historical data. Thus, this variable can be anywhere
 from 1 to 16, and will attempt to get as many tweets as possible given the API
@@ -718,7 +718,7 @@ optional arguments:
 \end{verbatim}
 \endgroup
 
-\subsection{\texttt{TwitterSA.py}}
+\subsection{\texttt{twittersa.py}}
 \label{sub:twittersa}
 
 \textbf{Note:} environment variables must be set before running the script.
@@ -726,9 +726,9 @@ optional arguments:
 \begingroup
 \fontsize{10pt}{12pt}\selectfont
 \begin{verbatim}
-[2014-12-12 16:10:35,371] INFO in TwitterSA: Loading classifier...
-[2014-12-12 16:10:57,365] INFO in TwitterSA: Done
-usage: TwitterSA.py [-h] [-d]
+[2014-12-12 16:10:35,371] INFO in twittersa: Loading classifier...
+[2014-12-12 16:10:57,365] INFO in twittersa: Done
+usage: twittersa.py [-h] [-d]
 
 optional arguments:
   -h, --help   show this help message and exit

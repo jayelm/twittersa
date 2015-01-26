@@ -1,1 +1,1 @@
-web: gunicorn TwitterSA:app --log-file -
+web: gunicorn twittersa:app --log-file -
